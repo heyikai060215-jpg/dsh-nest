@@ -1,0 +1,7 @@
+# 统一 LF，避免 Windows 上提交后 diff 全红
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.zst binary

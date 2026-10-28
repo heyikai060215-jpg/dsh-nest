@@ -1,0 +1,19 @@
+# ============================================================================
+# dsh-nest —— DSH bundle patch（插件自带的挂载声明）
+# ============================================================================
+# 装好之后，profile 只要在 `dsh.profile.bundles` 里列出本包名即生效：
+#
+#   dsh plugin --profile web add link:D:/dsh-mod/dsh-nest
+#
+# 真正的用户配置在 profile 自己的 cordis.patch.yml 里（id 对上就行）：
+#
+#   - id: nest
+#     name: dsh-nest
+#     config: { enabled: true, maxListed: 25, titleScan: 60 }
+# ============================================================================
+
+- insert:
+    - id: nest
+      name: dsh-nest
+      config:
+        enabled: true
