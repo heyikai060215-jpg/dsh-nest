@@ -118,3 +118,17 @@ test('formatSessionList 标出当前会话与开着的会话，并按 limit 截�
   assert.equal(formatSessionList(sessions, { limit: 1 }).shown.length, 1);
   assert.match(formatSessionList([], {}).text, /还没有别的会话/);
 });
+
+test('formatSessionList 把多个上级和下级都标出来', () => {
+  const sessions = [
+    { header: { id: 'kid', createdAt: 2 }, title: '子会话' },
+    { header: { id: 'mom-a', createdAt: 1 }, title: '妈 A' },
+    { header: { id: 'mom-b', createdAt: 1 }, title: '妈 B' },
+  ];
+  const { text } = formatSessionList(sessions, {
+    parents: { kid: ['mom-a', 'mom-b'] },
+    labelOf: (id) => (id === 'mom-a' ? '妈 A' : id === 'mom-b' ? '妈 B' : id),
+  });
+  assert.match(text, /归在「妈 A」「妈 B」下/);
+  assert.match(text, /1 个下级/);
+});

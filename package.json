@@ -1,6 +1,6 @@
 {
   "name": "dsh-nest",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "DSH 插件「巢」：在设置里用下拉框安排会话从属，让母会话像访问 agent 一样访问子会话（原地续聊，不复制历史）",
   "keywords": [
     "dsh",

@@ -15,12 +15,13 @@ after(() => {
 
 /**
  * 重写关系表（每个用例开始前调一次，避免互相污染）。
- * @param {Record<string,string>} parents 子 → 父
+ * @param {Record<string, string | string[]>} parents 子 → 上级（字符串或数组都行，一律写成 v2 数组）
  */
 function resetRelations(parents = {}) {
   const dir = path.join(TEST_HOME, 'dsh-nest');
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, 'relations.json'), JSON.stringify({ version: 1, updatedAt: Date.now(), parents }, null, 2), 'utf8');
+  const normalized = Object.fromEntries(Object.entries(parents).map(([child, value]) => [child, Array.isArray(value) ? value : [value]]));
+  fs.writeFileSync(path.join(dir, 'relations.json'), JSON.stringify({ version: 2, updatedAt: Date.now(), parents: normalized }, null, 2), 'utf8');
 }
 
 beforeEach(() => {
@@ -461,6 +462,25 @@ test('它这一轮报错时说清楚原因，而不是回一个空字符串', as
   );
   assert.equal(result.status, 'error');
   assert.match(result.reply, /has no value/);
+});
+
+test('同一个子会话挂在两个母会话下面：两边都能省略 session 访问它', async () => {
+  resetRelations({ 'session-other': ['parent-1', 'parent-2'] });
+  const harness = makeHarness({
+    sessions: [OTHER],
+    cold: new Map([['session-other', { reply: '谁来问都行' }]]),
+  });
+  apply(harness.ctx, { enabled: true });
+  const tool = harness.tools.get('nest_ask_session');
+
+  const fromFirst = await tool.execute({ message: '在吗' }, { agent: PARENT });
+  assert.equal(fromFirst.sessionId, 'session-other');
+  assert.equal(fromFirst.reply, '谁来问都行');
+
+  const secondParent = { id: 'parent-2', session: { header: { id: 'parent-2' } } };
+  const fromSecond = await tool.execute({ message: '我也问一句' }, { agent: secondParent });
+  assert.equal(fromSecond.sessionId, 'session-other');
+  assert.equal(fromSecond.reply, '谁来问都行');
 });
 
 
